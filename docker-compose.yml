@@ -11,9 +11,9 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./db/init:/docker-entrypoint-initdb.d:ro
-      - ./data:/data:ro
+      - ecommerce:/var/lib/postgresql/data
+      - ./datasets/ecommerce/init:/docker-entrypoint-initdb.d:ro
+      - ./datasets/ecommerce/raw:/data/ecommerce:ro
     healthcheck:
           test: ["CMD-SHELL", "pg_isready -U user -d analytics"]
           interval: 5s
@@ -33,4 +33,4 @@ services:
   #     - "5050:80"
 
 volumes:
-  pgdata:
+  ecommerce:
