@@ -43,10 +43,10 @@ GROUP BY
 ORDER BY
     customer_share_per_state DESC;
 
--- 4)
+-- 4) Customer concentration (Pareto Analysis)
+-- TODO: remember window functions
 
-
--- 5)
+-- 5) Average Orders per Customer by State
 SELECT
     state,
     ROUND(AVG(orders_count), 2) AS avg_orders_per_customer
@@ -65,3 +65,73 @@ GROUP BY
     state
 ORDER BY
     avg_orders_per_customer DESC;
+
+-- 6) Revenue by Customer State
+SELECT
+    c.customer_state AS state,
+    SUM(p.payment_value) AS state_revenue
+FROM
+    customers c
+JOIN
+    orders o
+ON c.customer_id = o.customer_id
+JOIN
+    order_payments p
+ON o.order_id = p.order_id
+GROUP BY
+    state
+ORDER BY
+    state_revenue DESC;
+
+-- 7) Revenue per Customer by State
+SELECT
+    state,
+    ROUND(AVG(customer_revenue), 2) AS avg_revenue_per_customer
+FROM (
+     SELECT
+         c.customer_state AS state,
+         c.customer_unique_id AS customer_unique_id,
+         SUM(p.payment_value) AS customer_revenue
+     FROM
+         customers c
+             JOIN
+         orders o
+         ON c.customer_id = o.customer_id
+             JOIN
+         order_payments p
+         ON o.order_id = p.order_id
+     GROUP BY
+         c.customer_state,
+         c.customer_unique_id
+) q
+GROUP BY
+    state
+ORDER BY
+    avg_revenue_per_customer DESC;
+
+-- 8) Top Cities by Revenue per Customer
+SELECT
+    city,
+    ROUND(AVG(customer_revenue), 2) AS avg_revenue_per_customer
+FROM (
+     SELECT
+         c.customer_city AS city,
+         c.customer_unique_id AS customer_unique_id,
+         SUM(p.payment_value) AS customer_revenue
+     FROM
+         customers c
+             JOIN
+         orders o
+         ON c.customer_id = o.customer_id
+             JOIN
+         order_payments p
+         ON o.order_id = p.order_id
+     GROUP BY
+         c.customer_city,
+         c.customer_unique_id
+) q
+GROUP BY
+    city
+ORDER BY
+    avg_revenue_per_customer DESC
+LIMIT 10;
