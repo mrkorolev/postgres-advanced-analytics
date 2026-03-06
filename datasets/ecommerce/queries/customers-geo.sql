@@ -42,3 +42,26 @@ GROUP BY
     ROLLUP(customer_state)
 ORDER BY
     customer_share_per_state DESC;
+
+-- 4)
+
+
+-- 5)
+SELECT
+    state,
+    ROUND(AVG(orders_count), 2) AS avg_orders_per_customer
+FROM (
+    SELECT
+        customer_state AS state,
+        customer_unique_id,
+        COUNT(*) AS orders_count
+    FROM
+        customers
+    GROUP BY
+        customer_state,
+        customer_unique_id
+)
+GROUP BY
+    state
+ORDER BY
+    avg_orders_per_customer DESC;
