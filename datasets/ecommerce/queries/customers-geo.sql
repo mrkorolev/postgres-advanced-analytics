@@ -44,7 +44,34 @@ ORDER BY
     customer_share_per_state DESC;
 
 -- 4) Customer concentration (Pareto Analysis)
--- TODO: remember window functions
+WITH state_customers AS (
+    SELECT
+        customer_state AS state,
+        COUNT(DISTINCT customer_unique_id) AS customers_per_state
+    FROM
+        customers
+    GROUP BY
+        customer_state
+), running_total_customers AS (
+    SELECT
+        state,
+        customers_per_state,
+        SUM(customers_per_state) OVER (
+            ORDER BY customers_per_state DESC, state
+            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+        ) AS running_customers
+    FROM
+        state_customers
+)
+SELECT
+    state,
+    customers_per_state,
+    running_customers,
+    ROUND(100.0 * running_customers / (
+        SELECT COUNT(DISTINCT customer_unique_id)
+        FROM customers
+    ), 2) AS running_customers_share_pct
+FROM running_total_customers;
 
 -- 5) Average Orders per Customer by State
 SELECT
